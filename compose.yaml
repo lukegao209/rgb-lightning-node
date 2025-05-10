@@ -8,6 +8,7 @@ services:
       RPCAUTH: "user:84c66d54d736d8b02aaa5b02e07e759b$$cc56c229b2a49ae2bfd5932cc8a6135d435bb9a7ac037ddd351d65936082c03d"
     ports:
       - 18443:18443
+      - 18444:18444
     volumes:
       - ./datacore:/srv/app/.bitcoin
   electrs:
@@ -15,7 +16,15 @@ services:
     environment:
       MYUID: 1000
       MYGID: 1000
+      BTCHOST: "192.168.1.9"
+      BTCRPCPORT: "18443"
+      BTCP2PPORT: "18444"
+      BTCUSER: "user"
       BTCPASS: "password"
+      NETWORK: "regtest"
+      LOG_LEVEL: "info"
+      PORT: "50001"
+      MONITORING_PORT: "24224"
     volumes:
       - ./dataindex:/srv/app/db
     depends_on:
