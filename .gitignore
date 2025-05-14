@@ -5,7 +5,7 @@
 /dataldk1
 /dataldk2
 /tmp
-
+/data
 # will have compiled files and executables
 /target
 

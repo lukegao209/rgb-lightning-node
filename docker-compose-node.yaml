@@ -1,0 +1,21 @@
+services:
+  rgb-lightning-node:
+    container_name: rgb-lightning-node
+    image: lnfi/rgb-lightning-node:0.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MYUID: 1000
+      MYGID: 1000
+    ports:
+      - 3001:3001
+      - 9735:9735
+    volumes:
+      - ./data:/rgb-lightning-node
+    command:
+      - "rgb-lightning-node"
+      - "--daemon-listening-port=3001"
+      - "--network=regtest"
+      - "--ldk-peer-listening-port=9735"
+      - "--max-media-upload-size-mb=5"
