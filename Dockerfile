@@ -1,16 +1,18 @@
-FROM rust:1.83.0-bookworm AS builder
+FROM rust:1.87.0-alpine AS builder
+
+# 添加构建依赖
+RUN apk add --no-cache musl-dev
 
 COPY . .
 
 RUN cargo build
 
 
-FROM debian:bookworm-slim
+FROM alpine:latest
 
 COPY --from=builder ./target/debug/rgb-lightning-node /usr/bin/rgb-lightning-node
 
-RUN apt-get update && apt install -y --no-install-recommends \
-    ca-certificates openssl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apk add --no-cache \
+    ca-certificates openssl
 
 ENTRYPOINT ["/usr/bin/rgb-lightning-node"]
