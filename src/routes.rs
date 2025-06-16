@@ -2144,7 +2144,10 @@ pub(crate) async fn list_peers(
     for peer_details in unlocked_state.peer_manager.list_peers() {
         peers.push(Peer {
             pubkey: peer_details.counterparty_node_id.to_string(),
-            address: peer_details.socket_address.map(|addr| addr.to_string()).unwrap_or_else(|| "unknown".to_string()),
+            address: peer_details
+                .socket_address
+                .map(|addr| addr.to_string())
+                .unwrap_or_else(|| "unknown".to_string()),
         })
     }
 
