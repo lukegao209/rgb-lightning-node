@@ -171,9 +171,6 @@ pub enum APIError {
     #[error("Invalid pubkey")]
     InvalidPubkey,
 
-    #[error("Invalid webhook URL: {0}")]
-    InvalidWebhookUrl(String),
-
     #[error("The provided recipient ID is neither a blinded UTXO or a script")]
     InvalidRecipientID,
 
@@ -197,6 +194,9 @@ pub enum APIError {
 
     #[error("Invalid transport endpoints: {0}")]
     InvalidTransportEndpoints(String),
+
+    #[error("Invalid webhook URL: {0}")]
+    InvalidWebhookUrl(String),
 
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
@@ -425,7 +425,6 @@ impl IntoResponse for APIError {
             | APIError::InvalidPeerInfo(_)
             | APIError::InvalidPrecision(_)
             | APIError::InvalidPubkey
-            | APIError::InvalidWebhookUrl(_)
             | APIError::InvalidRecipientID
             | APIError::InvalidRecipientNetwork
             | APIError::InvalidSwap(_)
@@ -434,6 +433,7 @@ impl IntoResponse for APIError {
             | APIError::InvalidTlvType(_)
             | APIError::InvalidTransportEndpoint(_)
             | APIError::InvalidTransportEndpoints(_)
+            | APIError::InvalidWebhookUrl(_)
             | APIError::MediaFileEmpty
             | APIError::MediaFileNotProvided
             | APIError::MissingSwapPaymentPreimage

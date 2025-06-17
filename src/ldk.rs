@@ -399,9 +399,14 @@ impl UnlockedAppState {
             .unwrap();
     }
 
-    pub(crate) fn add_webhook_subscription(&self, subscription: crate::routes::WebhookSubscription) {
+    pub(crate) fn add_webhook_subscription(
+        &self,
+        subscription: crate::routes::WebhookSubscription,
+    ) {
         let mut webhooks = self.get_webhook_subscriptions_storage();
-        webhooks.subscriptions.insert(subscription.id.clone(), subscription);
+        webhooks
+            .subscriptions
+            .insert(subscription.id.clone(), subscription);
         self.save_webhook_subscriptions(webhooks);
     }
 
@@ -428,11 +433,11 @@ impl UnlockedAppState {
 
     pub(crate) async fn send_webhook_event(&self, event_type: &str, payload: serde_json::Value) {
         let subscriptions = self.get_webhook_subscriptions();
-        
+
         for subscription in subscriptions {
             if subscription.active && subscription.events.contains(&event_type.to_string()) {
                 let client = reqwest::Client::new();
-                
+
                 match client
                     .post(&subscription.url)
                     .header("Content-Type", "application/json")
@@ -781,7 +786,7 @@ async fn handle_ldk_events(
                 amount_msat,
                 receiver_node_id: receiver_node_id.map(|id| id.to_string()),
             };
-            
+
             let unlocked_state_copy = unlocked_state.clone();
             tokio::spawn(async move {
                 if let Ok(payload_json) = serde_json::to_value(&webhook_payload) {
@@ -841,7 +846,6 @@ async fn handle_ldk_events(
                         .await;
                 }
             });
-            
         }
         Event::OpenChannelRequest {
             ref temporary_channel_id,

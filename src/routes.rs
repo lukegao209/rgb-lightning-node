@@ -1128,6 +1128,105 @@ pub(crate) struct Utxo {
     pub(crate) colorable: bool,
 }
 
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookSubscribeRequest {
+    pub(crate) url: String,
+    pub(crate) events: Vec<String>,
+    pub(crate) secret: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookSubscribeResponse {
+    pub(crate) subscription_id: String,
+    pub(crate) url: String,
+    pub(crate) events: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookUnsubscribeRequest {
+    pub(crate) subscription_id: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookListResponse {
+    pub(crate) subscriptions: Vec<WebhookSubscription>,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub(crate) struct WebhookSubscription {
+    pub(crate) id: String,
+    pub(crate) url: String,
+    pub(crate) events: Vec<String>,
+    pub(crate) created_at: u64,
+    pub(crate) active: bool,
+}
+
+impl lightning::util::ser::Writeable for WebhookSubscription {
+    fn write<W: lightning::util::ser::Writer>(
+        &self,
+        writer: &mut W,
+    ) -> Result<(), lightning::io::Error> {
+        self.id.write(writer)?;
+        self.url.write(writer)?;
+        (self.events.len() as u16).write(writer)?;
+        for event in &self.events {
+            event.write(writer)?;
+        }
+        self.created_at.write(writer)?;
+        self.active.write(writer)?;
+        Ok(())
+    }
+}
+
+impl lightning::util::ser::Readable for WebhookSubscription {
+    fn read<R: lightning::io::Read>(
+        reader: &mut R,
+    ) -> Result<Self, lightning::ln::msgs::DecodeError> {
+        let id: String = lightning::util::ser::Readable::read(reader)?;
+        let url: String = lightning::util::ser::Readable::read(reader)?;
+        let events_len: u16 = lightning::util::ser::Readable::read(reader)?;
+        let mut events = Vec::with_capacity(events_len as usize);
+        for _ in 0..events_len {
+            events.push(lightning::util::ser::Readable::read(reader)?);
+        }
+        let created_at: u64 = lightning::util::ser::Readable::read(reader)?;
+        let active: bool = lightning::util::ser::Readable::read(reader)?;
+
+        Ok(WebhookSubscription {
+            id,
+            url,
+            events,
+            created_at,
+            active,
+        })
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookPaymentClaimedEvent {
+    pub(crate) event_type: String, // "payment_claimed"
+    pub(crate) timestamp: u64,
+    pub(crate) payment_hash: String,
+    pub(crate) amount_msat: u64,
+    pub(crate) receiver_node_id: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookPaymentFailedEvent {
+    pub(crate) event_type: String, // "payment_failed"
+    pub(crate) timestamp: u64,
+    pub(crate) payment_hash: String,
+    pub(crate) reason: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct WebhookPaymentSentEvent {
+    pub(crate) event_type: String, // "payment_sent"
+    pub(crate) timestamp: u64,
+    pub(crate) payment_hash: String,
+    pub(crate) fee_paid_msat: u64,
+}
+
 impl AppState {
     fn check_changing_state(&self) -> Result<(), APIError> {
         if *self.get_changing_state() {
@@ -3599,113 +3698,20 @@ pub(crate) async fn unlock(
     .await
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookSubscribeRequest {
-    pub(crate) url: String,
-    pub(crate) events: Vec<String>,
-    pub(crate) secret: Option<String>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookSubscribeResponse {
-    pub(crate) subscription_id: String,
-    pub(crate) url: String,
-    pub(crate) events: Vec<String>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookUnsubscribeRequest {
-    pub(crate) subscription_id: String,
-}
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookListResponse {
-    pub(crate) subscriptions: Vec<WebhookSubscription>,
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-pub(crate) struct WebhookSubscription {
-    pub(crate) id: String,
-    pub(crate) url: String,
-    pub(crate) events: Vec<String>,
-    pub(crate) created_at: u64,
-    pub(crate) active: bool,
-}
-
-impl lightning::util::ser::Writeable for WebhookSubscription {
-    fn write<W: lightning::util::ser::Writer>(&self, writer: &mut W) -> Result<(), lightning::io::Error> {
-        self.id.write(writer)?;
-        self.url.write(writer)?;
-        (self.events.len() as u16).write(writer)?;
-        for event in &self.events {
-            event.write(writer)?;
-        }
-        self.created_at.write(writer)?;
-        self.active.write(writer)?;
-        Ok(())
-    }
-}
-
-impl lightning::util::ser::Readable for WebhookSubscription {
-    fn read<R: lightning::io::Read>(reader: &mut R) -> Result<Self, lightning::ln::msgs::DecodeError> {
-        let id: String = lightning::util::ser::Readable::read(reader)?;
-        let url: String = lightning::util::ser::Readable::read(reader)?;
-        let events_len: u16 = lightning::util::ser::Readable::read(reader)?;
-        let mut events = Vec::with_capacity(events_len as usize);
-        for _ in 0..events_len {
-            events.push(lightning::util::ser::Readable::read(reader)?);
-        }
-        let created_at: u64 = lightning::util::ser::Readable::read(reader)?;
-        let active: bool = lightning::util::ser::Readable::read(reader)?;
-        
-        Ok(WebhookSubscription {
-            id,
-            url,
-            events,
-            created_at,
-            active,
-        })
-    }
-}
-
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookPaymentClaimedEvent {
-    pub(crate) event_type: String, // "payment_claimed"
-    pub(crate) timestamp: u64,
-    pub(crate) payment_hash: String,
-    pub(crate) amount_msat: u64,
-    pub(crate) receiver_node_id: Option<String>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookPaymentFailedEvent {
-    pub(crate) event_type: String, // "payment_failed"
-    pub(crate) timestamp: u64,
-    pub(crate) payment_hash: String,
-    pub(crate) reason: String,
-}
-
-#[derive(Deserialize, Serialize)]
-pub(crate) struct WebhookPaymentSentEvent {
-    pub(crate) event_type: String, // "payment_sent"
-    pub(crate) timestamp: u64,
-    pub(crate) payment_hash: String,
-    pub(crate) fee_paid_msat: u64,
-}
-
 pub(crate) async fn webhook_subscribe(
     State(state): State<Arc<AppState>>,
     WithRejection(Json(payload), _): WithRejection<Json<WebhookSubscribeRequest>, APIError>,
 ) -> Result<Json<WebhookSubscribeResponse>, APIError> {
     let unlocked_state = state.check_unlocked().await?.clone().unwrap();
-    
+
     if !payload.url.starts_with("http://") && !payload.url.starts_with("https://") {
-        return Err(APIError::InvalidWebhookUrl("URL must start with http:// or https://".to_string()));
+        return Err(APIError::InvalidWebhookUrl(
+            "URL must start with http:// or https://".to_string(),
+        ));
     }
-    
+
     let subscription_id = uuid::Uuid::new_v4().to_string();
-    
+
     let subscription = WebhookSubscription {
         id: subscription_id.clone(),
         url: payload.url.clone(),
@@ -3713,9 +3719,9 @@ pub(crate) async fn webhook_subscribe(
         created_at: get_current_timestamp(),
         active: true,
     };
-    
+
     unlocked_state.add_webhook_subscription(subscription.clone());
-    
+
     Ok(Json(WebhookSubscribeResponse {
         subscription_id,
         url: payload.url,
@@ -3728,9 +3734,9 @@ pub(crate) async fn webhook_unsubscribe(
     WithRejection(Json(payload), _): WithRejection<Json<WebhookUnsubscribeRequest>, APIError>,
 ) -> Result<Json<EmptyResponse>, APIError> {
     let unlocked_state = state.check_unlocked().await?.clone().unwrap();
-    
+
     unlocked_state.remove_webhook_subscription(&payload.subscription_id);
-    
+
     Ok(Json(EmptyResponse {}))
 }
 
@@ -3738,10 +3744,8 @@ pub(crate) async fn webhook_list(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<WebhookListResponse>, APIError> {
     let unlocked_state = state.check_unlocked().await?.clone().unwrap();
-    
+
     let subscriptions = unlocked_state.get_webhook_subscriptions();
-    
-    Ok(Json(WebhookListResponse {
-        subscriptions,
-    }))
+
+    Ok(Json(WebhookListResponse { subscriptions }))
 }
