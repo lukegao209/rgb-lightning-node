@@ -171,6 +171,9 @@ pub enum APIError {
     #[error("Invalid pubkey")]
     InvalidPubkey,
 
+    #[error("Invalid webhook URL: {0}")]
+    InvalidWebhookUrl(String),
+
     #[error("The provided recipient ID is neither a blinded UTXO or a script")]
     InvalidRecipientID,
 
@@ -422,6 +425,7 @@ impl IntoResponse for APIError {
             | APIError::InvalidPeerInfo(_)
             | APIError::InvalidPrecision(_)
             | APIError::InvalidPubkey
+            | APIError::InvalidWebhookUrl(_)
             | APIError::InvalidRecipientID
             | APIError::InvalidRecipientNetwork
             | APIError::InvalidSwap(_)

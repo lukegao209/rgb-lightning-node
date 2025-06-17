@@ -47,7 +47,7 @@ use crate::routes::{
     list_peers, list_swaps, list_transactions, list_transfers, list_unspents, ln_invoice, lock,
     maker_execute, maker_init, network_info, node_info, open_channel, post_asset_media,
     refresh_transfers, restore, rgb_invoice, send_asset, send_btc, send_onion_message,
-    send_payment, shutdown, sign_message, sync, taker, unlock,
+    send_payment, shutdown, sign_message, sync, taker, unlock, webhook_list, webhook_subscribe, webhook_unsubscribe,
 };
 use crate::utils::{start_daemon, AppState, LOGS_DIR};
 
@@ -142,6 +142,9 @@ pub(crate) async fn app(args: LdkUserInfo) -> Result<(Router, Arc<AppState>), Ap
         .route("/networkinfo", get(network_info))
         .route("/nodeinfo", get(node_info))
         .route("/openchannel", post(open_channel))
+        .route("/webhook/subscribe", post(webhook_subscribe))
+        .route("/webhook/unsubscribe", post(webhook_unsubscribe))
+        .route("/webhook/list", get(webhook_list))
         .route("/refreshtransfers", post(refresh_transfers))
         .route("/restore", post(restore))
         .route("/rgbinvoice", post(rgb_invoice))
