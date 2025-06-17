@@ -1898,6 +1898,9 @@ components:
         pubkey:
           type: string
           example: 03b79a4bc1ec365524b4fab9a39eb133753646babb5a1da5c4bc94c53110b7795d
+        address:
+          type: string
+          example: 127.0.0.1:9735
     PostAssetMediaRequest:
       type: object
       properties:
