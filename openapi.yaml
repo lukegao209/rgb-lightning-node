@@ -29,6 +29,8 @@ tags:
     description: APIs to perform asset swaps
   - name: Other
     description: APIs to perform other operations
+  - name: Webhooks
+    description: APIs to manage webhook subscriptions
 paths:
   /address:
     post:
@@ -998,6 +1000,55 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UnlockRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+  /webhook/list:
+    get:
+      tags:
+        - Webhooks
+      summary: List webhook subscriptions
+      description: List all webhook subscriptions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookListResponse'
+  /webhook/subscribe:
+    post:
+      tags:
+        - Webhooks
+      summary: Subscribe to webhook events
+      description: Subscribe to receive webhook notifications for specific events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookSubscribeRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookSubscribeResponse'
+  /webhook/unsubscribe:
+    post:
+      tags:
+        - Webhooks
+      summary: Unsubscribe from webhook events
+      description: Unsubscribe from webhook notifications by subscription ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookUnsubscribeRequest'
       responses:
         '200':
           description: Successful operation
@@ -2434,3 +2485,69 @@ components:
         colorable:
           type: boolean
           example: true
+    WebhookListResponse:
+      type: object
+      properties:
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookSubscription'
+    WebhookSubscribeRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          example: https://your-webhook-endpoint.com/webhook
+        events:
+          type: array
+          items:
+            type: string
+          example: [payment_claimed, payment_sent, payment_failed]
+        secret:
+          type: string
+          example: your-webhook-secret
+      required:
+        - url
+        - events
+    WebhookSubscribeResponse:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        url:
+          type: string
+          example: https://your-webhook-endpoint.com/webhook
+        events:
+          type: array
+          items:
+            type: string
+          example: [payment_claimed, payment_sent, payment_failed]
+    WebhookSubscription:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        url:
+          type: string
+          example: https://your-webhook-endpoint.com/webhook
+        events:
+          type: array
+          items:
+            type: string
+          example: [payment_claimed, payment_sent, payment_failed]
+        created_at:
+          type: integer
+          example: 1703123456
+        active:
+          type: boolean
+          example: true
+    WebhookUnsubscribeRequest:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+      required:
+        - subscription_id

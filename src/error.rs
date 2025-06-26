@@ -204,6 +204,9 @@ pub enum APIError {
     #[error("Invalid transport endpoints: {0}")]
     InvalidTransportEndpoints(String),
 
+    #[error("Invalid webhook URL: {0}")]
+    InvalidWebhookUrl(String),
+
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
 
@@ -442,6 +445,7 @@ impl IntoResponse for APIError {
             | APIError::InvalidTlvType(_)
             | APIError::InvalidTransportEndpoint(_)
             | APIError::InvalidTransportEndpoints(_)
+            | APIError::InvalidWebhookUrl(_)
             | APIError::MediaFileEmpty
             | APIError::MediaFileNotProvided
             | APIError::MissingSwapPaymentPreimage
