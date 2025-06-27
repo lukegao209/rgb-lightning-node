@@ -2393,7 +2393,7 @@ components:
           type: array
           items:
             type: string
-          example: [payment_claimed, payment_sent, payment_failed]
+          example: [ReceivedSuccess, PaymentSuccess, PaymentFailed]
         secret:
           type: string
           example: your-webhook-secret
@@ -2413,7 +2413,7 @@ components:
           type: array
           items:
             type: string
-          example: [payment_claimed, payment_sent, payment_failed]
+          example: [ReceivedSuccess, PaymentSuccess, PaymentFailed]
     WebhookSubscription:
       type: object
       properties:
@@ -2427,7 +2427,7 @@ components:
           type: array
           items:
             type: string
-          example: [payment_claimed, payment_sent, payment_failed]
+          example: [ReceivedSuccess, PaymentSuccess, PaymentFailed]
         created_at:
           type: integer
           example: 1703123456

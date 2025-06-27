@@ -1204,7 +1204,7 @@ impl lightning::util::ser::Readable for WebhookSubscription {
 
 #[derive(Deserialize, Serialize)]
 pub(crate) struct WebhookPaymentClaimedEvent {
-    pub(crate) event_type: String, // "payment_claimed"
+    pub(crate) event_type: String, // "ReceivedSuccess"
     pub(crate) timestamp: u64,
     pub(crate) payment_hash: String,
     pub(crate) amount_msat: u64,
@@ -1213,7 +1213,7 @@ pub(crate) struct WebhookPaymentClaimedEvent {
 
 #[derive(Deserialize, Serialize)]
 pub(crate) struct WebhookPaymentFailedEvent {
-    pub(crate) event_type: String, // "payment_failed"
+    pub(crate) event_type: String, // "PaymentFailed"
     pub(crate) timestamp: u64,
     pub(crate) payment_hash: String,
     pub(crate) reason: String,
@@ -1221,7 +1221,7 @@ pub(crate) struct WebhookPaymentFailedEvent {
 
 #[derive(Deserialize, Serialize)]
 pub(crate) struct WebhookPaymentSentEvent {
-    pub(crate) event_type: String, // "payment_sent"
+    pub(crate) event_type: String, // "PaymentSuccess"
     pub(crate) timestamp: u64,
     pub(crate) payment_hash: String,
     pub(crate) fee_paid_msat: u64,
