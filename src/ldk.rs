@@ -780,7 +780,7 @@ async fn handle_ldk_events(
             }
 
             let webhook_payload = crate::routes::WebhookPaymentClaimedEvent {
-                event_type: "payment_claimed".to_string(),
+                event_type: "ReceivedSuccess".to_string(),
                 timestamp: crate::utils::get_current_timestamp(),
                 payment_hash: payment_hash.to_string(),
                 amount_msat,
@@ -791,7 +791,7 @@ async fn handle_ldk_events(
             tokio::spawn(async move {
                 if let Ok(payload_json) = serde_json::to_value(&webhook_payload) {
                     unlocked_state_copy
-                        .send_webhook_event("payment_claimed", payload_json)
+                        .send_webhook_event("ReceivedSuccess", payload_json)
                         .await;
                 }
             });
@@ -833,7 +833,7 @@ async fn handle_ldk_events(
             }
 
             let webhook_payload = crate::routes::WebhookPaymentSentEvent {
-                event_type: "payment_sent".to_string(),
+                event_type: "PaymentSuccess".to_string(),
                 timestamp: crate::utils::get_current_timestamp(),
                 payment_hash: payment_hash.to_string(),
                 fee_paid_msat: fee_paid_msat.unwrap_or(0),
@@ -842,7 +842,7 @@ async fn handle_ldk_events(
             tokio::spawn(async move {
                 if let Ok(payload_json) = serde_json::to_value(&webhook_payload) {
                     unlocked_state_copy
-                        .send_webhook_event("payment_sent", payload_json)
+                        .send_webhook_event("PaymentSuccess", payload_json)
                         .await;
                 }
             });
@@ -917,7 +917,7 @@ async fn handle_ldk_events(
             }
 
             let webhook_payload = crate::routes::WebhookPaymentFailedEvent {
-                event_type: "payment_failed".to_string(),
+                event_type: "PaymentFailed".to_string(),
                 timestamp: crate::utils::get_current_timestamp(),
                 payment_hash: payment_hash.unwrap().to_string(),
                 reason: format!("{:?}", reason.unwrap()),
@@ -926,7 +926,7 @@ async fn handle_ldk_events(
             tokio::spawn(async move {
                 if let Ok(payload_json) = serde_json::to_value(&webhook_payload) {
                     unlocked_state_copy
-                        .send_webhook_event("payment_failed", payload_json)
+                        .send_webhook_event("PaymentFailed", payload_json)
                         .await;
                 }
             });
