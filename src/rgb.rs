@@ -20,8 +20,8 @@ use rgb_lib::{
         Recipient, RefreshResult, SendResult, Transaction as RgbLibTransaction, Transfer,
         TransportEndpoint, Unspent, WalletData,
     },
-    AssetSchema, BitcoinNetwork, Contract, ContractId, Error as RgbLibError, RgbTransfer,
-    RgbTransport, RgbTxid, UpdateRes, Wallet as RgbLibWallet,
+    AssetSchema, Assignment, BitcoinNetwork, Contract, ContractId, Error as RgbLibError,
+    RgbTransfer, RgbTransport, RgbTxid, UpdateRes, Wallet as RgbLibWallet, WitnessOrd,
 };
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -284,6 +284,15 @@ impl UnlockedAppState {
     pub(crate) fn rgb_sync(&self) -> Result<(), RgbLibError> {
         self.rgb_wallet_wrapper.sync()
     }
+
+    pub(crate) fn rgb_upsert_witness(
+        &self,
+        witness_id: RgbTxid,
+        witness_ord: WitnessOrd,
+    ) -> Result<(), RgbLibError> {
+        self.rgb_wallet_wrapper
+            .upsert_witness(witness_id, witness_ord)
+    }
 }
 
 pub(crate) struct RgbLibWalletWrapper {
@@ -313,7 +322,7 @@ impl RgbLibWalletWrapper {
     ) -> Result<ReceiveData, RgbLibError> {
         self.get_rgb_wallet().blind_receive(
             asset_id,
-            None,
+            Assignment::Any,
             duration_seconds,
             transport_endpoints,
             min_confirmations,
@@ -615,12 +624,21 @@ impl RgbLibWalletWrapper {
             .update_witnesses(after_height, force_witnesses)
     }
 
+    pub(crate) fn upsert_witness(
+        &self,
+        witness_id: RgbTxid,
+        witness_ord: WitnessOrd,
+    ) -> Result<(), RgbLibError> {
+        self.get_rgb_wallet()
+            .upsert_witness(witness_id, witness_ord)
+    }
+
     pub(crate) fn witness_receive(
         &self,
         transport_endpoints: Vec<String>,
     ) -> Result<ReceiveData, RgbLibError> {
         self.get_rgb_wallet()
-            .witness_receive(None, None, None, transport_endpoints, 0)
+            .witness_receive(None, Assignment::Any, None, transport_endpoints, 0)
     }
 }
 

@@ -113,6 +113,9 @@ pub enum APIError {
 
     #[error("Invalid hex bytes")]
     InvalidAssetIDBytes,
+    
+    #[error("Invalid assignment")]
+    InvalidAssignment,
 
     #[error("Invalid attachments: {0}")]
     InvalidAttachments(String),
@@ -264,9 +267,6 @@ pub enum APIError {
     #[error("Swap not found: {0}")]
     SwapNotFound(String),
 
-    #[error("Sync needed")]
-    SyncNeeded,
-
     #[error("Temporary channel ID already used")]
     TemporaryChannelIdAlreadyUsed,
 
@@ -300,7 +300,7 @@ pub enum APIError {
 
 impl APIError {
     fn name(&self) -> String {
-        format!("{:?}", self)
+        format!("{self:?}")
             .split('(')
             .next()
             .unwrap()
@@ -333,14 +333,14 @@ impl From<RgbLibError> for APIError {
                 APIError::Network(format!("indexer err: {details}"))
             }
             RgbLibError::InsufficientAllocationSlots => APIError::NoAvailableUtxos,
+            RgbLibError::InsufficientAssignments { .. } => APIError::InsufficientAssets,
             RgbLibError::InsufficientBitcoins { needed, available } => {
                 APIError::InsufficientFunds(needed - available)
             }
-            RgbLibError::InsufficientSpendableAssets { .. } => APIError::InsufficientAssets,
-            RgbLibError::InsufficientTotalAssets { .. } => APIError::InsufficientAssets,
             RgbLibError::InvalidAddress { details } => APIError::InvalidAddress(details),
             RgbLibError::InvalidAmountZero => APIError::InvalidAmount(s!("0")),
             RgbLibError::InvalidAssetID { asset_id } => APIError::InvalidAssetID(asset_id),
+            RgbLibError::InvalidAssignment => APIError::InvalidAssignment,
             RgbLibError::InvalidAttachments { details } => APIError::InvalidAttachments(details),
             RgbLibError::InvalidDetails { details } => APIError::InvalidDetails(details),
             RgbLibError::InvalidElectrum { details } => APIError::InvalidIndexer(details),
@@ -373,7 +373,6 @@ impl From<RgbLibError> for APIError {
             RgbLibError::OutputBelowDustLimit => APIError::OutputBelowDustLimit,
             RgbLibError::Proxy { details } => APIError::Network(format!("proxy err: {details}")),
             RgbLibError::RecipientIDAlreadyUsed => APIError::RecipientIDAlreadyUsed,
-            RgbLibError::SyncNeeded => APIError::SyncNeeded,
             RgbLibError::TooHighIssuanceAmounts => {
                 APIError::InvalidAmount(s!("trying to issue too many assets"))
             }
@@ -418,6 +417,7 @@ impl IntoResponse for APIError {
             | APIError::InvalidAnnounceAlias(_)
             | APIError::InvalidAssetID(_)
             | APIError::InvalidAssetIDBytes
+            | APIError::InvalidAssignment
             | APIError::InvalidAttachments(_)
             | APIError::InvalidBackupPath
             | APIError::InvalidChannelID
@@ -483,7 +483,6 @@ impl IntoResponse for APIError {
             | APIError::PaymentNotFound(_)
             | APIError::RecipientIDAlreadyUsed
             | APIError::SwapNotFound(_)
-            | APIError::SyncNeeded
             | APIError::TemporaryChannelIdAlreadyUsed
             | APIError::UnknownContractId
             | APIError::UnknownLNInvoice
@@ -522,7 +521,4 @@ impl IntoResponse for APIError {
 pub enum AppError {
     #[error("Port {0} is unavailable")]
     UnavailablePort(u16),
-
-    #[error("PoC does not support selected network")]
-    UnsupportedBitcoinNetwork,
 }
